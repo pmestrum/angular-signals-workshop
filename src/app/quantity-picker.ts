@@ -1,7 +1,6 @@
-import { ChangeDetectionStrategy, Component, model } from '@angular/core';
+import { Component, model } from '@angular/core';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-quantity-picker',
   template: `
     <button (click)="change(-1)" [disabled]="value() <= 1">-</button>

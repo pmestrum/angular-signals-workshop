@@ -1,9 +1,8 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { Product } from './product.model';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-product-list',
   imports: [CurrencyPipe],
   template: `

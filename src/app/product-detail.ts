@@ -1,10 +1,9 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, input, linkedSignal, output } from '@angular/core';
+import { Component, computed, input, linkedSignal, output } from '@angular/core';
 import { CartLine, Product } from './product.model';
 import { QuantityPicker } from './quantity-picker';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-product-detail',
   imports: [CurrencyPipe, QuantityPicker],
   template: `

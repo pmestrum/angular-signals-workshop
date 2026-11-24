@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, linkedSignal, resource, signal } from '@angular/core';
+import { Component, computed, effect, linkedSignal, resource, signal } from '@angular/core';
 import { Cart } from './cart';
 import { CartLine, Product } from './product.model';
 import { ProductDetail } from './product-detail';
@@ -16,7 +16,6 @@ function loadCart(): CartLine[] {
 }
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-root',
   imports: [ProductList, ProductDetail, Cart],
   template: `

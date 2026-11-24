@@ -1,9 +1,8 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { CartLine } from './product.model';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-cart',
   imports: [CurrencyPipe],
   template: `
