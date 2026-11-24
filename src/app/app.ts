@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, effect, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, resource, signal } from '@angular/core';
 import { Cart } from './cart';
 import { CartLine, Product } from './product.model';
 import { ProductDetail } from './product-detail';
@@ -28,25 +28,25 @@ function loadCart(): CartLine[] {
 
     <nav>
       @for (c of categories; track c) {
-        <button [class.active]="c === category()" (click)="setCategory(c)">{{ c }}</button>
+        <button [class.active]="c === category()" (click)="category.set(c)">{{ c }}</button>
       }
       <span class="spacer"></span>
       <label>
         <input #fail type="checkbox" (change)="simulateError.set(fail.checked)" />
         simulate error
       </label>
-      <button (click)="load()">reload</button>
+      <button (click)="products.reload()">reload</button>
     </nav>
 
     <main>
       <section class="card products">
         <h2>products</h2>
-        @if (loading()) {
+        @if (products.isLoading()) {
           <p class="hint">loading...</p>
-        } @else if (error()) {
+        } @else if (products.error()) {
           <p class="error">could not load the products</p>
         } @else {
-          <app-product-list [products]="products()" [selected]="selected()" (pick)="select($event)" />
+          <app-product-list [products]="products.value() ?? []" [selected]="selected()" (pick)="select($event)" />
         }
       </section>
 
@@ -74,14 +74,15 @@ function loadCart(): CartLine[] {
     .cart { overflow: auto; }
   `,
 })
-export class App implements OnInit {
+export class App {
   categories = ['all', 'books', 'games', 'music'];
   category = signal('all');
-  products = signal<Product[]>([]);
-  loading = signal(false);
-  error = signal(false);
   simulateError = signal(false);
   selected = signal<Product | undefined>(undefined);
+  products = resource({
+    params: () => ({ category: this.category() }),
+    loader: ({ params }) => fetchProducts(params.category, this.simulateError()),
+  });
   cart = signal<CartLine[]>(loadCart());
   cartCount = computed(() => this.cart().reduce((count, line) => count + line.quantity, 0));
 
@@ -89,28 +90,6 @@ export class App implements OnInit {
     effect(() => {
       localStorage.setItem(CART_KEY, JSON.stringify(this.cart()));
     });
-  }
-
-  ngOnInit() {
-    this.load();
-  }
-
-  async load() {
-    this.loading.set(true);
-    this.error.set(false);
-    try {
-      this.products.set(await fetchProducts(this.category(), this.simulateError()));
-    } catch {
-      this.products.set([]);
-      this.error.set(true);
-    } finally {
-      this.loading.set(false);
-    }
-  }
-
-  setCategory(category: string) {
-    this.category.set(category);
-    this.load();
   }
 
   select(product: Product) {
