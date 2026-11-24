@@ -1,9 +1,19 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, signal } from '@angular/core';
 import { Cart } from './cart';
 import { CartLine, Product } from './product.model';
 import { ProductDetail } from './product-detail';
 import { ProductList } from './product-list';
 import { fetchProducts } from './products.api';
+
+const CART_KEY = 'mini-webshop-cart';
+
+function loadCart(): CartLine[] {
+  try {
+    return JSON.parse(localStorage.getItem(CART_KEY) ?? '[]');
+  } catch {
+    return [];
+  }
+}
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -72,8 +82,14 @@ export class App implements OnInit {
   error = signal(false);
   simulateError = signal(false);
   selected = signal<Product | undefined>(undefined);
-  cart = signal<CartLine[]>([]);
+  cart = signal<CartLine[]>(loadCart());
   cartCount = computed(() => this.cart().reduce((count, line) => count + line.quantity, 0));
+
+  constructor() {
+    effect(() => {
+      localStorage.setItem(CART_KEY, JSON.stringify(this.cart()));
+    });
+  }
 
   ngOnInit() {
     this.load();
