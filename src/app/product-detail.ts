@@ -1,5 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, linkedSignal, output } from '@angular/core';
 import { CartLine, Product } from './product.model';
 import { QuantityPicker } from './quantity-picker';
 
@@ -32,7 +32,7 @@ import { QuantityPicker } from './quantity-picker';
 export class ProductDetail {
   product = input<Product>();
   add = output<CartLine>();
-  quantity = signal(1);
+  quantity = linkedSignal({ source: this.product, computation: () => 1 });
   subtotal = computed(() => (this.product()?.price ?? 0) * this.quantity());
 
   addToCart() {

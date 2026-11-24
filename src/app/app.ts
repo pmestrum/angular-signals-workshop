@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, resource, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, linkedSignal, resource, signal } from '@angular/core';
 import { Cart } from './cart';
 import { CartLine, Product } from './product.model';
 import { ProductDetail } from './product-detail';
@@ -78,11 +78,11 @@ export class App {
   categories = ['all', 'books', 'games', 'music'];
   category = signal('all');
   simulateError = signal(false);
-  selected = signal<Product | undefined>(undefined);
   products = resource({
     params: () => ({ category: this.category() }),
     loader: ({ params }) => fetchProducts(params.category, this.simulateError()),
   });
+  selected = linkedSignal(() => this.products.value()?.[0]);
   cart = signal<CartLine[]>(loadCart());
   cartCount = computed(() => this.cart().reduce((count, line) => count + line.quantity, 0));
 
