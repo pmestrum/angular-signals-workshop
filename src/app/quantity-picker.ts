@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, model } from '@angular/core';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -14,10 +14,9 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
   `,
 })
 export class QuantityPicker {
-  value = input(1);
-  valueChange = output<number>();
+  value = model(1);
 
   change(delta: number) {
-    this.valueChange.emit(this.value() + delta);
+    this.value.update((value) => value + delta);
   }
 }
