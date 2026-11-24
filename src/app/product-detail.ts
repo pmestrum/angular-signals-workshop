@@ -1,5 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { CartLine, Product } from './product.model';
 import { QuantityPicker } from './quantity-picker';
 
@@ -30,11 +30,11 @@ import { QuantityPicker } from './quantity-picker';
 export class ProductDetail {
   @Input() product?: Product;
   @Output() add = new EventEmitter<CartLine>();
-  quantity = 1;
+  quantity = signal(1);
 
   addToCart() {
     if (this.product) {
-      this.add.emit({ product: this.product, quantity: this.quantity });
+      this.add.emit({ product: this.product, quantity: this.quantity() });
     }
   }
 }

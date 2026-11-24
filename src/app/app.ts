@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { Cart } from './cart';
 import { CartLine, Product } from './product.model';
 import { ProductDetail } from './product-detail';
@@ -18,11 +18,11 @@ import { fetchProducts } from './products.api';
 
     <nav>
       @for (c of categories; track c) {
-        <button [class.active]="c === category" (click)="setCategory(c)">{{ c }}</button>
+        <button [class.active]="c === category()" (click)="setCategory(c)">{{ c }}</button>
       }
       <span class="spacer"></span>
       <label>
-        <input #fail type="checkbox" (change)="simulateError = fail.checked" />
+        <input #fail type="checkbox" (change)="simulateError.set(fail.checked)" />
         simulate error
       </label>
       <button (click)="load()">reload</button>
@@ -31,23 +31,23 @@ import { fetchProducts } from './products.api';
     <main>
       <section class="card products">
         <h2>products</h2>
-        @if (loading) {
+        @if (loading()) {
           <p class="hint">loading...</p>
-        } @else if (error) {
+        } @else if (error()) {
           <p class="error">could not load the products</p>
         } @else {
-          <app-product-list [products]="products" [selected]="selected" (pick)="select($event)" />
+          <app-product-list [products]="products()" [selected]="selected()" (pick)="select($event)" />
         }
       </section>
 
       <section class="card detail">
         <h2>selected product</h2>
-        <app-product-detail [product]="selected" (add)="addToCart($event)" />
+        <app-product-detail [product]="selected()" (add)="addToCart($event)" />
       </section>
 
       <section class="card cart">
         <h2>cart</h2>
-        <app-cart [lines]="cart" (remove)="removeFromCart($event)" />
+        <app-cart [lines]="cart()" (remove)="removeFromCart($event)" />
       </section>
     </main>
   `,
@@ -66,56 +66,57 @@ import { fetchProducts } from './products.api';
 })
 export class App implements OnInit {
   categories = ['all', 'books', 'games', 'music'];
-  category = 'all';
-  products: Product[] = [];
-  loading = false;
-  error = false;
-  simulateError = false;
-  selected?: Product;
-  cart: CartLine[] = [];
+  category = signal('all');
+  products = signal<Product[]>([]);
+  loading = signal(false);
+  error = signal(false);
+  simulateError = signal(false);
+  selected = signal<Product | undefined>(undefined);
+  cart = signal<CartLine[]>([]);
 
   ngOnInit() {
     this.load();
   }
 
   async load() {
-    this.loading = true;
-    this.error = false;
+    this.loading.set(true);
+    this.error.set(false);
     try {
-      this.products = await fetchProducts(this.category, this.simulateError);
+      this.products.set(await fetchProducts(this.category(), this.simulateError()));
     } catch {
-      this.products = [];
-      this.error = true;
+      this.products.set([]);
+      this.error.set(true);
     } finally {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 
   setCategory(category: string) {
-    this.category = category;
+    this.category.set(category);
     this.load();
   }
 
   select(product: Product) {
-    this.selected = product;
+    this.selected.set(product);
   }
 
   addToCart(line: CartLine) {
-    const existing = this.cart.find((l) => l.product.id === line.product.id);
-    if (existing) {
-      this.cart = this.cart.map((l) =>
-        l === existing ? { ...l, quantity: Math.min(9, l.quantity + line.quantity) } : l,
-      );
-    } else {
-      this.cart = [...this.cart, line];
-    }
+    this.cart.update((cart) => {
+      const existing = cart.find((l) => l.product.id === line.product.id);
+      if (existing) {
+        return cart.map((l) =>
+          l === existing ? { ...l, quantity: Math.min(9, l.quantity + line.quantity) } : l,
+        );
+      }
+      return [...cart, line];
+    });
   }
 
   removeFromCart(productId: number) {
-    this.cart = this.cart.filter((l) => l.product.id !== productId);
+    this.cart.update((cart) => cart.filter((l) => l.product.id !== productId));
   }
 
   get cartCount() {
-    return this.cart.reduce((count, line) => count + line.quantity, 0);
+    return this.cart().reduce((count, line) => count + line.quantity, 0);
   }
 }
