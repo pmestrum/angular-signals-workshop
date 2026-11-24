@@ -1,0 +1,10 @@
+[
+  { "id": 1, "name": "The signal handbook", "category": "books", "price": 29.9 },
+  { "id": 2, "name": "Reactive patterns", "category": "books", "price": 34.5 },
+  { "id": 3, "name": "Clean components", "category": "books", "price": 24 },
+  { "id": 4, "name": "Tower of change", "category": "games", "price": 39.99 },
+  { "id": 5, "name": "Zone escape", "category": "games", "price": 19.99 },
+  { "id": 6, "name": "Pixel garden", "category": "games", "price": 14.5 },
+  { "id": 7, "name": "Synth waves", "category": "music", "price": 12.99 },
+  { "id": 8, "name": "Quiet compile", "category": "music", "price": 9.99 }
+]
