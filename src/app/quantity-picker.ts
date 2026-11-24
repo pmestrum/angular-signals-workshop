@@ -1,12 +1,12 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-quantity-picker',
   template: `
-    <button (click)="change(-1)" [disabled]="value <= 1">-</button>
-    <span class="value">{{ value }}</span>
-    <button (click)="change(1)" [disabled]="value >= 9">+</button>
+    <button (click)="change(-1)" [disabled]="value() <= 1">-</button>
+    <span class="value">{{ value() }}</span>
+    <button (click)="change(1)" [disabled]="value() >= 9">+</button>
   `,
   styles: `
     :host { display: inline-flex; align-items: center; gap: 8px; }
@@ -14,10 +14,10 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
   `,
 })
 export class QuantityPicker {
-  @Input() value = 1;
-  @Output() valueChange = new EventEmitter<number>();
+  value = input(1);
+  valueChange = output<number>();
 
   change(delta: number) {
-    this.valueChange.emit(this.value + delta);
+    this.valueChange.emit(this.value() + delta);
   }
 }

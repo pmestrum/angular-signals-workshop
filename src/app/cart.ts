@@ -1,5 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { CartLine } from './product.model';
 
 @Component({
@@ -8,7 +8,7 @@ import { CartLine } from './product.model';
   imports: [CurrencyPipe],
   template: `
     <ul>
-      @for (line of lines; track line.product.id) {
+      @for (line of lines(); track line.product.id) {
         <li>
           <span class="name">{{ line.product.name }}</span>
           <span>x {{ line.quantity }}</span>
@@ -19,7 +19,7 @@ import { CartLine } from './product.model';
         <li class="hint">your cart is empty</li>
       }
     </ul>
-    <p class="total">total: {{ total | currency: 'EUR' }}</p>
+    <p class="total">total: {{ total() | currency: 'EUR' }}</p>
   `,
   styles: `
     ul { list-style: none; margin: 0; padding: 0; }
@@ -30,10 +30,9 @@ import { CartLine } from './product.model';
   `,
 })
 export class Cart {
-  @Input() lines: CartLine[] = [];
-  @Output() remove = new EventEmitter<number>();
-
-  get total() {
-    return this.lines.reduce((sum, line) => sum + line.product.price * line.quantity, 0);
-  }
+  lines = input<CartLine[]>([]);
+  remove = output<number>();
+  total = computed(() =>
+    this.lines().reduce((sum, line) => sum + line.product.price * line.quantity, 0),
+  );
 }

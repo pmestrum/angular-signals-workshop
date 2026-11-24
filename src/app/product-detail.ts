@@ -1,5 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { CartLine, Product } from './product.model';
 import { QuantityPicker } from './quantity-picker';
 
@@ -8,7 +8,7 @@ import { QuantityPicker } from './quantity-picker';
   selector: 'app-product-detail',
   imports: [CurrencyPipe, QuantityPicker],
   template: `
-    @if (product) {
+    @if (product(); as product) {
       <h3>{{ product.name }}</h3>
       <p>
         <span class="pill">{{ product.category }}</span>
@@ -16,6 +16,7 @@ import { QuantityPicker } from './quantity-picker';
       </p>
       <div class="row">
         <app-quantity-picker [(value)]="quantity" />
+        <span class="subtotal">{{ subtotal() | currency: 'EUR' }}</span>
         <button class="primary" (click)="addToCart()">add to cart</button>
       </div>
     } @else {
@@ -25,16 +26,19 @@ import { QuantityPicker } from './quantity-picker';
   styles: `
     h3 { margin: 0 0 8px; }
     .row { display: flex; align-items: center; gap: 16px; }
+    .subtotal { flex: 1; text-align: right; }
   `,
 })
 export class ProductDetail {
-  @Input() product?: Product;
-  @Output() add = new EventEmitter<CartLine>();
+  product = input<Product>();
+  add = output<CartLine>();
   quantity = signal(1);
+  subtotal = computed(() => (this.product()?.price ?? 0) * this.quantity());
 
   addToCart() {
-    if (this.product) {
-      this.add.emit({ product: this.product, quantity: this.quantity() });
+    const product = this.product();
+    if (product) {
+      this.add.emit({ product, quantity: this.quantity() });
     }
   }
 }
