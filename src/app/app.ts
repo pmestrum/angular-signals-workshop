@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, signal } from '@angular/core';
 import { Cart } from './cart';
 import { CartLine, Product } from './product.model';
 import { ProductDetail } from './product-detail';
@@ -13,7 +13,7 @@ import { fetchProducts } from './products.api';
     <header>
       <img src="delaware.svg" alt="delaware" />
       <h1>mini webshop</h1>
-      <span class="pill count">cart: {{ cartCount }}</span>
+      <span class="pill count">cart: {{ cartCount() }}</span>
     </header>
 
     <nav>
@@ -73,6 +73,7 @@ export class App implements OnInit {
   simulateError = signal(false);
   selected = signal<Product | undefined>(undefined);
   cart = signal<CartLine[]>([]);
+  cartCount = computed(() => this.cart().reduce((count, line) => count + line.quantity, 0));
 
   ngOnInit() {
     this.load();
@@ -114,9 +115,5 @@ export class App implements OnInit {
 
   removeFromCart(productId: number) {
     this.cart.update((cart) => cart.filter((l) => l.product.id !== productId));
-  }
-
-  get cartCount() {
-    return this.cart().reduce((count, line) => count + line.quantity, 0);
   }
 }
