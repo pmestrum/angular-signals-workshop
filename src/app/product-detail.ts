@@ -1,14 +1,13 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, input, Input, linkedSignal, output, Output, signal } from '@angular/core';
 import { CartLine, Product } from './product.model';
 import { QuantityPicker } from './quantity-picker';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-product-detail',
   imports: [CurrencyPipe, QuantityPicker],
   template: `
-    @if (product) {
+    @if (product(); as product) {
       <h3>{{ product.name }}</h3>
       <p>
         <span class="pill">{{ product.category }}</span>
@@ -28,13 +27,13 @@ import { QuantityPicker } from './quantity-picker';
   `,
 })
 export class ProductDetail {
-  @Input() product?: Product;
-  @Output() add = new EventEmitter<CartLine>();
-  quantity = 1;
-
+  product = input<Product>();
+  add = output<CartLine>();
+  quantity = linkedSignal({ source: this.product, computation: () => 1 });
   addToCart() {
-    if (this.product) {
-      this.add.emit({ product: this.product, quantity: this.quantity });
+    const product = this.product();
+    if (product) {
+      this.add.emit({ product, quantity: this.quantity() });
     }
   }
 }

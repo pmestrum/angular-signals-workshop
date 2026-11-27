@@ -1,15 +1,14 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, input, Input, output, Output } from '@angular/core';
 import { Product } from './product.model';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-product-list',
   imports: [CurrencyPipe],
   template: `
     <ul>
-      @for (product of products; track product.id) {
-        <li [class.selected]="product.id === selected?.id">
+      @for (product of products(); track product.id) {
+        <li [class.selected]="product.id === selected()?.id">
           <span class="name">{{ product.name }}</span>
           <span class="pill">{{ product.category }}</span>
           <span class="price">{{ product.price | currency: 'EUR' }}</span>
@@ -29,7 +28,7 @@ import { Product } from './product.model';
   `,
 })
 export class ProductList {
-  @Input({ required: true }) products: Product[] = [];
-  @Input() selected?: Product;
-  @Output() pick = new EventEmitter<Product>();
+  products = input.required<Product[]>();
+  selected =input<Product>();
+  pick = output<Product>();
 }
