@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, linkedSignal, model, OnInit, resource, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, computed, effect, inject, linkedSignal, model, resource, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Cart } from './cart';
 import { CartLine, Product } from './product.model';
 import { ProductDetail } from './product-detail';
 import { ProductList } from './product-list';
+import { ProductsService } from './products.service';
 import { fetchProducts } from './products.api';
 
 const CART_KEY = 'cart';
@@ -134,7 +136,6 @@ export class App {
   category = signal('all');
 
   simulateError = signal(false);
-  // selected = signal<Product | undefined>(undefined);
   selected = linkedSignal(() => this.products.value()?.[0]);
   cart = signal<CartLine[]>(loadCart());
 
@@ -142,20 +143,23 @@ export class App {
 
   cartCount = computed(() => this.cart().reduce((count, line) => count + line.quantity, 0));
 
+  private readonly productsService = inject(ProductsService);
+
   products = resource({
-    params: () => ({ category: this.category() }),
-    loader: ({ params }) => fetchProducts(params.category, this.simulateError()),
-  })
+    params: () => ({ category: this.category(), textSearch: this.textSearch() }),
+       loader: ({ params }) => this.productsService.getProducts(params.category, params.textSearch, this.simulateError()),})
+
+  // products = toSignal(
+  //   toObservable(this.textSearch).pipe(
+  //     debounceTime(300),
+  //     switchMap(q => this.http.get<Product[]>(`/api/items?q=${q}`))),
+  //   { initialValue: [] });
 
   constructor() {
     effect(() => {
       localStorage.setItem(CART_KEY, JSON.stringify(this.cart()));
     });
   }
-
-  // setCategory(category: string) {
-  //   this.category.set(category);
-  // }
 
   select(product: Product) {
     this.selected.set(product);
